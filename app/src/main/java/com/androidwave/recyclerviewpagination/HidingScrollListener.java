@@ -3,8 +3,7 @@ package com.androidwave.recyclerviewpagination;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-public abstract class HidingScrollListener extends RecyclerView.OnScrollListener
-{
+public abstract class HidingScrollListener extends RecyclerView.OnScrollListener {
     private static final int HIDE_THRESHOLD = 15;
     public boolean controlsVisible = true;
     public int scrolledDistance = 0;
