@@ -4,7 +4,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 public abstract class HidingScrollListener extends RecyclerView.OnScrollListener {
-    private static final int HIDE_THRESHOLD = 15;
+    private static final int HIDE_THRESHOLD = 10;
     public boolean controlsVisible = true;
     public int scrolledDistance = 0;
     public int previousTotal = 0;

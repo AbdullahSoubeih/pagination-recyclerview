@@ -1,13 +1,10 @@
 package com.androidwave.recyclerviewpagination;
 
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -17,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
-    public static final int VIEW_TYPE_EMPTY = 0;
+    public static final int VIEW_TYPE_LOADING = 0;
     public static final int VIEW_TYPE_NORMAL = 1;
 
 
@@ -43,8 +40,8 @@ public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             case VIEW_TYPE_NORMAL:
                 return new ViewHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false));
-            case VIEW_TYPE_EMPTY:
-                return new EmptyViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false));
+            case VIEW_TYPE_LOADING:
+                return new FooterHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false));
             default:
                 return null;
         }
@@ -57,26 +54,48 @@ public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (mPostItems != null && mPostItems.size() > 0) {
-            return VIEW_TYPE_NORMAL;
-        } else {
-            return VIEW_TYPE_EMPTY;
-        }
+        return position == mPostItems.size() - 1 ? VIEW_TYPE_LOADING : VIEW_TYPE_NORMAL;
+//        if (mPostItems != null && mPostItems.size() > 0) {
+//            return VIEW_TYPE_NORMAL;
+//        } else {
+//            return VIEW_TYPE_EMPTY;
+//        }
     }
 
     @Override
     public int getItemCount() {
-        if (mPostItems != null && mPostItems.size() > 0) {
-            return mPostItems.size();
-        } else {
-            return 1;
+        return mPostItems == null ? 0 : mPostItems.size();
+//        if (mPostItems != null && mPostItems.size() > 0) {
+//            return mPostItems.size();
+//        } else {
+//            return 1;
+//        }
+    }
+
+    public void clear() {
+        mPostItems.clear();
+    }
+
+    public void setItems(List<PostItem> postItems) {
+        mPostItems.addAll(postItems);
+        notifyDataSetChanged();
+    }
+
+    public void addHeader() {
+        mPostItems.add(new PostItem());
+        notifyDataSetChanged();
+    }
+
+    public void removeHeader() {
+        int position = mPostItems.size() - 1;
+        PostItem item = mPostItems.get(position);
+
+        if (item != null) {
+            mPostItems.remove(position);
+            notifyItemRemoved(position);
         }
     }
 
-    public void addItems(List<PostItem> followers) {
-        mPostItems = followers;
-        notifyDataSetChanged();
-    }
 
     public class ViewHolder extends BaseViewHolder {
         @BindView(R.id.textViewTitle)
@@ -104,13 +123,13 @@ public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         }
     }
 
-    public class EmptyViewHolder extends BaseViewHolder {
+    public class FooterHolder extends BaseViewHolder {
 
         @BindView(R.id.progressBar)
         ProgressBar mProgressBar;
 
 
-        public EmptyViewHolder(View itemView) {
+        public FooterHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
