@@ -6,6 +6,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -13,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
-
+    private static final String TAG = "MainActivity";
     @BindView(R.id.mRecyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.swipeRefresh)
@@ -23,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public static final int PAGE_START = 1;
     private int currentPage = PAGE_START;
     private boolean isLastPage = false;
+    private int totalPage = 10;
+    private boolean isLoading = false;
     int itemCount = 0;
 
     @Override
@@ -41,23 +44,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mAdapter = new PostRecyclerAdapter(new ArrayList<PostItem>());
         mRecyclerView.setAdapter(mAdapter);
         preparedListItem();
-        mRecyclerView.addOnScrollListener(new HidingScrollListener(mLayoutManager) {
+        mRecyclerView.addOnScrollListener(new PaginationScrollListener(mLayoutManager) {
             @Override
-            public void onHide() {
-                mAdapter.removeHeader();
+            protected void loadMoreItems() {
+                isLoading = true;
+                currentPage++;
+                preparedListItem();
+
             }
 
             @Override
-            public void onShow() {
-                mAdapter.addHeader();
+            public boolean isLastPage() {
+                return isLastPage;
             }
 
             @Override
-            public void onLoadMore(int current_page) {
-                if (!isLastPage) {
-                    preparedListItem();
-                }
-
+            public boolean isLoading() {
+                return isLoading;
             }
         });
     }
@@ -70,14 +73,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             public void run() {
                 for (int i = 0; i < 10; i++) {
                     itemCount++;
+                    Log.d(TAG, "run: " + itemCount);
                     PostItem postItem = new PostItem();
                     postItem.setTitle("Fake Android Apps With Over 50,000 " + itemCount);
                     postItem.setDescription("Fake Android Apps With Over 50,000 Installations Found on Google Play, Quick Heal Claims");
                     items.add(postItem);
 
                 }
-                mAdapter.setItems(items);
+                if (currentPage != PAGE_START) mAdapter.removeLoading();
+                mAdapter.addAll(items);
                 swipeRefresh.setRefreshing(false);
+                if (currentPage < totalPage) mAdapter.addLoading();
+                else isLastPage = true;
+                isLoading = false;
 
             }
         }, 1500);

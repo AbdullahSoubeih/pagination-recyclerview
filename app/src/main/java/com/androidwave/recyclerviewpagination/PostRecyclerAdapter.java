@@ -2,36 +2,30 @@ package com.androidwave.recyclerviewpagination;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
-    public static final int VIEW_TYPE_LOADING = 0;
-    public static final int VIEW_TYPE_NORMAL = 1;
+    private static final int VIEW_TYPE_LOADING = 0;
+    private static final int VIEW_TYPE_NORMAL = 1;
+    private boolean isLoaderVisible = false;
 
-
-    private Callback mCallback;
     private List<PostItem> mPostItems;
 
     public PostRecyclerAdapter(List<PostItem> postItems) {
         this.mPostItems = postItems;
     }
 
-    public interface Callback {
-        void onRepoEmptyViewRetryClick();
-    }
-
-    public void setCallback(Callback callback) {
-        mCallback = callback;
-    }
 
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -54,46 +48,61 @@ public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return position == mPostItems.size() - 1 ? VIEW_TYPE_LOADING : VIEW_TYPE_NORMAL;
-//        if (mPostItems != null && mPostItems.size() > 0) {
-//            return VIEW_TYPE_NORMAL;
-//        } else {
-//            return VIEW_TYPE_EMPTY;
-//        }
+        if (isLoaderVisible) {
+            return position == mPostItems.size() - 1 ? VIEW_TYPE_LOADING : VIEW_TYPE_NORMAL;
+        } else {
+            return VIEW_TYPE_NORMAL;
+        }
     }
 
     @Override
     public int getItemCount() {
         return mPostItems == null ? 0 : mPostItems.size();
-//        if (mPostItems != null && mPostItems.size() > 0) {
-//            return mPostItems.size();
-//        } else {
-//            return 1;
-//        }
     }
 
-    public void clear() {
-        mPostItems.clear();
+    public void add(PostItem response) {
+        mPostItems.add(response);
+        notifyItemInserted(mPostItems.size() - 1);
     }
 
-    public void setItems(List<PostItem> postItems) {
-        mPostItems.addAll(postItems);
-        notifyDataSetChanged();
+    public void addAll(List<PostItem> postItems) {
+        for (PostItem response : postItems) {
+            add(response);
+        }
     }
 
-    public void addHeader() {
-        mPostItems.add(new PostItem());
-        notifyDataSetChanged();
+
+    private void remove(PostItem postItems) {
+        int position = mPostItems.indexOf(postItems);
+        if (position > -1) {
+            mPostItems.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
-    public void removeHeader() {
+    public void addLoading() {
+        isLoaderVisible = true;
+        add(new PostItem());
+    }
+
+    public void removeLoading() {
+        isLoaderVisible = false;
         int position = mPostItems.size() - 1;
-        PostItem item = mPostItems.get(position);
-
+        PostItem item = getItem(position);
         if (item != null) {
             mPostItems.remove(position);
             notifyItemRemoved(position);
         }
+    }
+
+    public void clear() {
+        while (getItemCount() > 0) {
+            remove(getItem(0));
+        }
+    }
+
+    PostItem getItem(int position) {
+        return mPostItems.get(position);
     }
 
 
@@ -104,7 +113,7 @@ public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         TextView textViewDescription;
 
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -129,7 +138,7 @@ public class PostRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         ProgressBar mProgressBar;
 
 
-        public FooterHolder(View itemView) {
+        FooterHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
