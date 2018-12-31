@@ -44,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mAdapter = new PostRecyclerAdapter(new ArrayList<PostItem>());
         mRecyclerView.setAdapter(mAdapter);
         preparedListItem();
+        /**
+         * add scroll listener while user reach in bottom load more will call
+         */
         mRecyclerView.addOnScrollListener(new PaginationScrollListener(mLayoutManager) {
             @Override
             protected void loadMoreItems() {

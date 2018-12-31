@@ -1,9 +1,6 @@
-
 package com.androidwave.recyclerviewpagination;
 
-
 import com.google.gson.annotations.SerializedName;
-
 
 public class PostItem {
 
