@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 isLoading = false;
 
             }
-        }, 1500);
+        }, 2000);
     }
 
     @Override
